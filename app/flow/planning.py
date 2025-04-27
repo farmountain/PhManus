@@ -64,6 +64,11 @@ class PlanningFlow(BaseFlow):
     async def execute(self, input_text: str) -> str:
         """Execute the planning flow with agents."""
         try:
+            # Detect simple tasks based on keywords or length
+            if len(input_text.split()) <= 5 and "stock price" in input_text.lower():
+                logger.info("Detected a simple task. Executing directly.")
+                return await self._execute_simple_task(input_text)
+
             if not self.primary_agent:
                 raise ValueError("No primary agent available")
 
@@ -102,6 +107,19 @@ class PlanningFlow(BaseFlow):
         except Exception as e:
             logger.error(f"Error in PlanningFlow: {str(e)}")
             return f"Execution failed: {str(e)}"
+
+    async def _execute_simple_task(self, input_text: str) -> str:
+        """Handle simple tasks directly without detailed planning."""
+        try:
+            # Example: Fetch stock price directly
+            if "stock price" in input_text.lower():
+                stock_name = input_text.split("stock price")[-1].strip()
+                return f"Fetching stock price for {stock_name}... (mock result: $123.45)"
+
+            return "Simple task executed successfully."
+        except Exception as e:
+            logger.error(f"Error executing simple task: {e}")
+            return f"Error executing simple task: {str(e)}"
 
     async def _create_initial_plan(self, request: str) -> None:
         """Create an initial plan based on the request using the flow's LLM and PlanningTool."""
