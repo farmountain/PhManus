@@ -1,5 +1,9 @@
 # PhManus
 
+<p align="center">
+  <img src="PhManus_logo.png" alt="PhManus Logo">
+</p>
+
 **PhManus** is a task planning and execution framework that leverages agents to create, manage, and execute plans. It is designed to handle both simple and complex tasks using a modular and extensible architecture.
 
 ---
