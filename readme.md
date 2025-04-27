@@ -1,7 +1,7 @@
 # PhManus
 
 <p align="center">
-  <img src="PhManus_logo.png" alt="PhManus Logo">
+  <img src="PhManus_logo.png" alt="PhManus Logo" style="width: 10%; height: auto;">
 </p>
 
 **PhManus** is a task planning and execution framework that leverages agents to create, manage, and execute plans. It is designed to handle both simple and complex tasks using a modular and extensible architecture.
@@ -95,6 +95,34 @@ The framework integrates with an LLM to generate plans and summaries.
 
 ---
 
+## Ollama Integration
+
+To integrate Ollama with PhManus, follow these steps:
+
+1. **Install Ollama**:
+   Ensure you have Ollama installed on your system. You can download it from the [Ollama website](https://ollama.ai/).
+
+2. **Run Ollama Locally**:
+   Start the Ollama server locally by running the following command:
+   ```bash
+   ollama serve
+   ```
+
+3. **Update Configuration**:
+   Modify the `config.toml` file in the `config/` directory to include your Ollama endpoint details:
+   ```toml
+   [ollama]
+   endpoint = "http://localhost:11434"
+   ```
+
+4. **Test Integration**:
+   Run the following command to test the integration:
+   ```bash
+   python run_flow.py --test-ollama
+   ```
+
+---
+
 ## Contributing
 
 Contributions are welcome! To contribute:
@@ -107,6 +135,12 @@ Contributions are welcome! To contribute:
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## Acknowledgments
+
+This project references and builds upon the work of [OpenManus](https://github.com/farmountain/OpenManus). We thank the contributors of OpenManus for their foundational code and inspiration.
 
 ---
 
