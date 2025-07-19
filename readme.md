@@ -16,6 +16,7 @@
 - **Plan Management**: Tracks task progress, step statuses, and provides summaries upon completion.
 - **Extensibility**: Easily extendable to support new agents, tools, and workflows.
 
+- **Command Line Demo**: `run_flow.py` provides a simple interactive example.
 ---
 
 ## Installation
@@ -92,6 +93,9 @@ The framework integrates with an LLM to generate plans and summaries.
 2. **Plan Creation**: The framework generates a plan using the LLM and planning tool.
 3. **Step Execution**: Each step is executed by the appropriate agent.
 4. **Completion**: The framework finalizes the plan and provides a summary.
+
+## Documentation
+Additional information including the architecture overview, design goals and roadmap can be found in the [docs](./docs) directory. See [usage_demo.md](docs/usage_demo.md) for a CLI example.
 
 ---
 
