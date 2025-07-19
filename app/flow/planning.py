@@ -114,7 +114,9 @@ class PlanningFlow(BaseFlow):
             # Example: Fetch stock price directly
             if "stock price" in input_text.lower():
                 stock_name = input_text.split("stock price")[-1].strip()
-                return f"Fetching stock price for {stock_name}... (mock result: $123.45)"
+                return (
+                    f"Fetching stock price for {stock_name}... (mock result: $123.45)"
+                )
 
             return "Simple task executed successfully."
         except Exception as e:
