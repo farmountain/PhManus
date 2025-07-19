@@ -1,0 +1,22 @@
+workflow:
+  name: prompt_workflow
+  description: Multi-agent process to create and refine prompts
+  steps:
+    - id: generate_prompt
+      agent: prompt-engineering-agent
+      trigger: user_request
+      actions:
+        - use_tools: [PythonExecute, WebSearch, FileSaver]
+        - save_output: initial_prompt.md
+    - id: evaluate_prompt
+      agent: prompt-quality-evaluator-agent
+      trigger: generate_prompt.completed
+      actions:
+        - compute_score
+        - save_output: evaluation_report.md
+    - id: optimize_prompt
+      agent: prompt-optimizer-agent
+      trigger: "evaluate_prompt.score < 0.8"
+      actions:
+        - refine_prompt
+        - save_output: optimized_prompt.md
