@@ -17,6 +17,7 @@
 - **Extensibility**: Easily extendable to support new agents, tools, and workflows.
 
 - **Command Line Demo**: `run_flow.py` provides a simple interactive example.
+- **Side Panel Terminal UI**: `side_panel.py` opens a split screen showing agent thoughts and logs in real time.
 ---
 
 ## Installation
@@ -37,6 +38,17 @@
 ---
 
 ## Usage
+
+### Quick Start
+Run the command line demo:
+```bash
+python run_flow.py
+```
+
+Or launch the side panel interface:
+```bash
+python side_panel.py
+```
 
 ### 1. Initialize the Planning Flow
 The `PlanningFlow` class is the core of the framework. It manages agents, plans, and task execution.
