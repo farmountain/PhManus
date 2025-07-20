@@ -13,3 +13,4 @@ Key design goals:
 
 This approach allows rapid experimentation with different agents or LLM backends
 while keeping the orchestration simple.
+The framework now ships with a domain specialist agent and sample YAML workflows for industry scenarios.
