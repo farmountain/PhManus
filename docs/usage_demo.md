@@ -30,6 +30,6 @@ print(result)
 You can also load predefined workflows from YAML:
 ```python
 from app.flow.workflow_loader import load_workflow
-wf = load_workflow("agent_templates/industry_agent_steps.yaml")
+wf = load_workflow("agent_templates/finance_agent_steps.yaml")
 print(wf["steps"])
 ```

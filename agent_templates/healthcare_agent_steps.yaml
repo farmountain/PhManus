@@ -1,0 +1,34 @@
+workflow:
+  name: healthcare_prompt_workflow
+  description: Generate and refine prompts for healthcare oriented tasks
+  steps:
+    - id: analyze_domain
+      agent: domain-specialist-agent
+      trigger: user_request
+      actions:
+        - gather_healthcare_requirements
+        - save_output: healthcare_notes.md
+    - id: engineer_prompt
+      agent: prompt-engineering-agent
+      trigger: analyze_domain.completed
+      actions:
+        - use_tools: [PythonExecute, WebSearch, FileSaver]
+        - save_output: draft_prompt.md
+    - id: evaluate_prompt
+      agent: prompt-quality-evaluator-agent
+      trigger: engineer_prompt.completed
+      actions:
+        - compute_score
+        - save_output: evaluation_report.md
+    - id: optimize_prompt
+      agent: prompt-optimizer-agent
+      trigger: "evaluate_prompt.score < 0.9"
+      actions:
+        - refine_prompt
+        - save_output: optimized_prompt.md
+    - id: final_review
+      agent: domain-specialist-agent
+      trigger: optimize_prompt.completed
+      actions:
+        - verify_domain_compliance
+        - save_output: final_prompt.md

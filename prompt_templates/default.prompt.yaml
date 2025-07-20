@@ -1,0 +1,9 @@
+role: default-role
+objective: "Describe the objective"
+kpis:
+  - quality
+  - efficiency
+output_format: markdown
+constraints:
+  - "Follow security guidelines"
+  - "Be concise"
