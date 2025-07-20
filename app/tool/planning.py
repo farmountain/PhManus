@@ -1,17 +1,22 @@
 # tool/planning.py
 import asyncio
+import json
+import os
+import sqlite3
+from contextlib import closing
 from typing import Dict, List, Literal, Optional
 
 import requests
 
-from app.config import config
+from app.config import WORKSPACE_ROOT, config
 from app.exceptions import ToolError
 from app.tool.base import BaseTool, ToolResult
 
 
 _PLANNING_TOOL_DESCRIPTION = """
 A planning tool that allows the agent to create and manage plans for solving complex tasks.
-The tool provides functionality for creating plans, updating plan steps, and tracking progress.
+The tool provides functionality for creating plans, updating plan steps, tracking progress,
+and optionally persisting plans to a JSON file or SQLite database.
 """
 
 
@@ -27,7 +32,7 @@ class PlanningTool(BaseTool):
         "type": "object",
         "properties": {
             "command": {
-                "description": "The command to execute. Available commands: create, update, list, get, set_active, mark_step, delete.",
+                "description": "The command to execute. Available commands: create, update, list, get, set_active, mark_step, delete, resume.",
                 "enum": [
                     "create",
                     "update",
@@ -36,6 +41,7 @@ class PlanningTool(BaseTool):
                     "set_active",
                     "mark_step",
                     "delete",
+                    "resume",
                 ],
                 "type": "string",
             },
@@ -73,6 +79,90 @@ class PlanningTool(BaseTool):
     plans: dict = {}  # Dictionary to store plans by plan_id
     _current_plan_id: Optional[str] = None  # Track the current active plan
 
+    storage_type: Literal["memory", "json", "sqlite"] = "memory"
+    storage_path: Optional[str] = None
+    _conn: Optional[sqlite3.Connection] = None
+
+    def __init__(self, storage_type: str = "memory", storage_path: Optional[str] = None):
+        super().__init__(storage_type=storage_type, storage_path=storage_path)
+        if self.storage_type in {"json", "sqlite"}:
+            if not self.storage_path:
+                default = "plans.json" if self.storage_type == "json" else "plans.db"
+                self.storage_path = str(WORKSPACE_ROOT / default)
+
+        if self.storage_type == "sqlite":
+            self._conn = sqlite3.connect(self.storage_path)
+            self._init_db()
+
+        self._load_plans()
+
+    def _init_db(self) -> None:
+        if not self._conn:
+            return
+        with closing(self._conn.cursor()) as c:
+            c.execute(
+                "CREATE TABLE IF NOT EXISTS plans (plan_id TEXT PRIMARY KEY, title TEXT, steps TEXT, step_statuses TEXT, step_notes TEXT)"
+            )
+            self._conn.commit()
+
+    def _load_plans(self) -> None:
+        """Load existing plans from storage into memory."""
+        if self.storage_type == "json":
+            if self.storage_path and os.path.exists(self.storage_path):
+                try:
+                    with open(self.storage_path, "r", encoding="utf-8") as f:
+                        self.plans = json.load(f)
+                except Exception:
+                    self.plans = {}
+        elif self.storage_type == "sqlite" and self._conn:
+            with closing(self._conn.cursor()) as c:
+                c.execute("SELECT plan_id, title, steps, step_statuses, step_notes FROM plans")
+                rows = c.fetchall()
+                self.plans = {}
+                for pid, title, steps, statuses, notes in rows:
+                    self.plans[pid] = {
+                        "plan_id": pid,
+                        "title": title,
+                        "steps": json.loads(steps),
+                        "step_statuses": json.loads(statuses),
+                        "step_notes": json.loads(notes),
+                    }
+        else:
+            self.plans = {}
+
+    def _persist_plan(self, plan: Dict) -> None:
+        if self.storage_type == "json" and self.storage_path:
+            try:
+                with open(self.storage_path, "w", encoding="utf-8") as f:
+                    json.dump(self.plans, f, indent=2)
+            except Exception:
+                pass
+        elif self.storage_type == "sqlite" and self._conn:
+            with closing(self._conn.cursor()) as c:
+                c.execute(
+                    "REPLACE INTO plans (plan_id, title, steps, step_statuses, step_notes) VALUES (?, ?, ?, ?, ?)",
+                    (
+                        plan["plan_id"],
+                        plan["title"],
+                        json.dumps(plan["steps"]),
+                        json.dumps(plan["step_statuses"]),
+                        json.dumps(plan["step_notes"]),
+                    ),
+                )
+                self._conn.commit()
+
+    def _remove_plan(self, plan_id: str) -> None:
+        if self.storage_type == "json" and self.storage_path:
+            try:
+                with open(self.storage_path, "w", encoding="utf-8") as f:
+                    json.dump(self.plans, f, indent=2)
+            except Exception:
+                pass
+        elif self.storage_type == "sqlite" and self._conn:
+            with closing(self._conn.cursor()) as c:
+                c.execute("DELETE FROM plans WHERE plan_id=?", (plan_id,))
+                self._conn.commit()
+
     async def _sync_with_mcp(
         self, method: str, plan_id: str, payload: Optional[dict] = None
     ):
@@ -102,7 +192,7 @@ class PlanningTool(BaseTool):
         self,
         *,
         command: Literal[
-            "create", "update", "list", "get", "set_active", "mark_step", "delete"
+            "create", "update", "list", "get", "set_active", "mark_step", "delete", "resume"
         ],
         plan_id: Optional[str] = None,
         title: Optional[str] = None,
@@ -141,9 +231,11 @@ class PlanningTool(BaseTool):
             return self._mark_step(plan_id, step_index, step_status, step_notes)
         elif command == "delete":
             return self._delete_plan(plan_id)
+        elif command == "resume":
+            return self._resume_plan(plan_id)
         else:
             raise ToolError(
-                f"Unrecognized command: {command}. Allowed commands are: create, update, list, get, set_active, mark_step, delete"
+                f"Unrecognized command: {command}. Allowed commands are: create, update, list, get, set_active, mark_step, delete, resume"
             )
 
     def _create_plan(
@@ -181,6 +273,7 @@ class PlanningTool(BaseTool):
 
         self.plans[plan_id] = plan
         self._current_plan_id = plan_id  # Set as active plan
+        self._persist_plan(plan)
 
         asyncio.create_task(self._sync_with_mcp("POST", plan_id, plan))
 
@@ -232,6 +325,8 @@ class PlanningTool(BaseTool):
             plan["steps"] = steps
             plan["step_statuses"] = new_statuses
             plan["step_notes"] = new_notes
+
+        self._persist_plan(plan)
 
         asyncio.create_task(self._sync_with_mcp("PUT", plan_id, plan))
 
@@ -287,6 +382,10 @@ class PlanningTool(BaseTool):
             output=f"Plan '{plan_id}' is now the active plan.\n\n{self._format_plan(self.plans[plan_id])}"
         )
 
+    def _resume_plan(self, plan_id: Optional[str]) -> ToolResult:
+        """Resume a saved plan by setting it active."""
+        return self._set_active_plan(plan_id)
+
     def _mark_step(
         self,
         plan_id: Optional[str],
@@ -332,6 +431,8 @@ class PlanningTool(BaseTool):
         if step_notes:
             plan["step_notes"][step_index] = step_notes
 
+        self._persist_plan(plan)
+
         return ToolResult(
             output=f"Step {step_index} updated in plan '{plan_id}'.\n\n{self._format_plan(plan)}"
         )
@@ -345,6 +446,7 @@ class PlanningTool(BaseTool):
             raise ToolError(f"No plan found with ID: {plan_id}")
 
         del self.plans[plan_id]
+        self._remove_plan(plan_id)
 
         # If the deleted plan was the active plan, clear the active plan
         if self._current_plan_id == plan_id:

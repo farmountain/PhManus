@@ -93,7 +93,8 @@ You can extend the framework by:
 Agents are responsible for executing specific steps in a plan. The `get_executor` method selects the appropriate agent based on the step type.
 
 ### 2. **Planning Tool**
-The `PlanningTool` manages plans, including creating, updating, and retrieving plan details.
+The `PlanningTool` manages plans, including creating, updating, and retrieving plan details. Plans can
+optionally be saved to JSON or SQLite files so they can be resumed across sessions.
 
 ### 3. **LLM Integration**
 The framework integrates with an LLM to generate plans and summaries.
