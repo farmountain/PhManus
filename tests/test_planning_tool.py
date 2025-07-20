@@ -1,8 +1,8 @@
 import asyncio
-import json
-import os
-from app.tool.planning import PlanningTool
+
 import pytest
+
+from app.tool.planning import PlanningTool
 
 
 def test_json_persistence(tmp_path):

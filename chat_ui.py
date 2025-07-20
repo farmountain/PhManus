@@ -4,6 +4,7 @@ import gradio as gr
 
 from app.logger import logger
 
+
 try:
     from app.agent.manus import Manus as _Manus
 except Exception:  # pragma: no cover - missing heavy deps in tests
@@ -19,6 +20,7 @@ class ChatSession:
         global Manus
         if Manus is None:
             from app.agent.manus import Manus as _Manus
+
             Manus = _Manus
         self.agent = Manus()
 
