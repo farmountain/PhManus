@@ -1,12 +1,14 @@
 import asyncio
 import json
+
 import pytest
 
-from app.flow.planning import PlanningFlow
-from app.tool.planning import PlanningTool
 from app.agent.base import BaseAgent
-from app.llm import LLM
 from app.flow.base import PlanStepStatus
+from app.flow.planning import PlanningFlow
+from app.llm import LLM
+from app.tool.planning import PlanningTool
+
 
 class DummyAgent(BaseAgent):
     name: str = "dummy"
@@ -15,6 +17,7 @@ class DummyAgent(BaseAgent):
 
     async def step(self) -> str:
         return "ok"
+
 
 @pytest.fixture()
 def dummy_flow(monkeypatch):
@@ -51,6 +54,7 @@ def dummy_flow(monkeypatch):
     )
     return flow
 
+
 @pytest.mark.asyncio
 async def test_create_initial_plan(dummy_flow):
     flow = dummy_flow
@@ -58,6 +62,7 @@ async def test_create_initial_plan(dummy_flow):
     await asyncio.sleep(0)
     assert "p1" in flow.planning_tool.plans
     assert flow.planning_tool.plans["p1"]["title"] == "Example Plan"
+
 
 @pytest.mark.asyncio
 async def test_get_current_step_info(dummy_flow):
@@ -72,6 +77,7 @@ async def test_get_current_step_info(dummy_flow):
         flow.planning_tool.plans["p1"]["step_statuses"][0]
         == PlanStepStatus.IN_PROGRESS.value
     )
+
 
 @pytest.mark.asyncio
 async def test_mark_step_completed(dummy_flow):
