@@ -39,6 +39,11 @@ class SearchSettings(BaseModel):
     engine: str = Field(default="Google", description="Search engine the llm to use")
 
 
+class MCPSettings(BaseModel):
+    server_url: Optional[str] = Field(None, description="Base URL of the MCP server")
+    api_key: Optional[str] = Field(None, description="API key for MCP server")
+
+
 class BrowserSettings(BaseModel):
     headless: bool = Field(False, description="Whether to run browser in headless mode")
     disable_security: bool = Field(
@@ -68,6 +73,9 @@ class AppConfig(BaseModel):
     )
     search_config: Optional[SearchSettings] = Field(
         None, description="Search configuration"
+    )
+    mcp_config: Optional[MCPSettings] = Field(
+        None, description="MCP server configuration"
     )
 
     class Config:
@@ -166,6 +174,10 @@ class Config:
         if search_config:
             search_settings = SearchSettings(**search_config)
 
+        mcp_config = None
+        if "mcp" in raw_config:
+            mcp_config = MCPSettings(**raw_config["mcp"]) if raw_config["mcp"] else None
+
         config_dict = {
             "llm": {
                 "default": default_settings,
@@ -176,6 +188,7 @@ class Config:
             },
             "browser_config": browser_settings,
             "search_config": search_settings,
+            "mcp_config": mcp_config,
         }
 
         self._config = AppConfig(**config_dict)
@@ -191,6 +204,10 @@ class Config:
     @property
     def search_config(self) -> Optional[SearchSettings]:
         return self._config.search_config
+
+    @property
+    def mcp_config(self) -> Optional[MCPSettings]:
+        return self._config.mcp_config
 
 
 config = Config()

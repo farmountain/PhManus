@@ -65,3 +65,8 @@ temperature = 0.0                           # Controls randomness for vision mod
 # [search]
 # Search engine for agent to use. Default is "Google", can be set to "Baidu" or "DuckDuckGo".
 #engine = "Google"
+
+# MCP server configuration
+[mcp]
+server_url = "http://localhost:8000"  # Base URL of the MCP server
+api_key = ""  # API key for MCP server

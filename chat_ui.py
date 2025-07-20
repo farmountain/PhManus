@@ -39,11 +39,16 @@ def respond(message, history):
     return asyncio.run(sess.generate(message))
 
 
-chatbot = gr.ChatInterface(
-    respond,
-    title="Manus Chat",
-    description="ChatGPT style interface powered by Manus agent",
-)
+with gr.Blocks() as chatbot:
+    gr.Markdown(
+        "<a href='https://github.com/modelcontextprotocol/servers' target='_blank'>"
+        "\ud83d\udcbe MCP Servers Marketplace</a>"
+    )
+    gr.ChatInterface(
+        respond,
+        title="Manus Chat",
+        description="ChatGPT style interface powered by Manus agent",
+    )
 
 
 def launch():
