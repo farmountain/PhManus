@@ -43,7 +43,12 @@
 ### Quick Start
 Run the command line demo:
 ```bash
-python run_flow.py
+python run_flow.py "your task" [--plan-id PLAN123] [--verbose]
+```
+
+Use `--list-tools` to display available tools before running:
+```bash
+python run_flow.py --list-tools
 ```
 
 Or launch the side panel interface:
