@@ -1,17 +1,16 @@
 # Usage Example
 
-The simplest way to try the framework is to run the interactive command line
-helper:
+The simplest way to try the framework is to run the command line helper with a prompt:
 
 ```bash
-python run_flow.py
+python run_flow.py "Summarise the recent news about space exploration"
 ```
 
-You will be prompted for a task description. The `PlanningFlow` will generate a
-plan, execute each step with the `Manus` agent and print the result. For example:
+Add `--list-tools` to see the tools available before execution.
+
+The `PlanningFlow` will generate a plan, execute each step with the `Manus` agent and print the result. For example:
 
 ```text
-Enter your prompt: Summarise the recent news about space exploration
 Processing your request...
 Plan completed:
 ...
