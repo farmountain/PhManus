@@ -83,7 +83,9 @@ class PlanningTool(BaseTool):
     storage_path: Optional[str] = None
     _conn: Optional[sqlite3.Connection] = None
 
-    def __init__(self, storage_type: str = "memory", storage_path: Optional[str] = None):
+    def __init__(
+        self, storage_type: str = "memory", storage_path: Optional[str] = None
+    ):
         super().__init__(storage_type=storage_type, storage_path=storage_path)
         if self.storage_type in {"json", "sqlite"}:
             if not self.storage_path:
@@ -116,7 +118,9 @@ class PlanningTool(BaseTool):
                     self.plans = {}
         elif self.storage_type == "sqlite" and self._conn:
             with closing(self._conn.cursor()) as c:
-                c.execute("SELECT plan_id, title, steps, step_statuses, step_notes FROM plans")
+                c.execute(
+                    "SELECT plan_id, title, steps, step_statuses, step_notes FROM plans"
+                )
                 rows = c.fetchall()
                 self.plans = {}
                 for pid, title, steps, statuses, notes in rows:
@@ -192,7 +196,14 @@ class PlanningTool(BaseTool):
         self,
         *,
         command: Literal[
-            "create", "update", "list", "get", "set_active", "mark_step", "delete", "resume"
+            "create",
+            "update",
+            "list",
+            "get",
+            "set_active",
+            "mark_step",
+            "delete",
+            "resume",
         ],
         plan_id: Optional[str] = None,
         title: Optional[str] = None,
