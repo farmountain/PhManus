@@ -5,9 +5,10 @@ The `PlanningFlow` coordinates task execution by invoking different agents. Each
 subclasses `BaseAgent` and can use tools from `ToolCollection` such as `PythonExecute`,
 `WebSearch` and `BrowserUseTool`.
 
-The central planning capability is implemented via the `PlanningTool`, which stores
-plans in memory and tracks step progress. Agents call this tool through the language
-model using function calling to create and update plans.
+The central planning capability is implemented via the `PlanningTool`, which tracks
+step progress and can optionally persist plans to JSON or SQLite files. Agents call
+this tool through the language model using function calling to create, update and
+resume plans.
 
 ```
 User -> PlanningFlow -> [Agents] -> Tools
