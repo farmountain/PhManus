@@ -21,6 +21,7 @@ class SidePanelUI:
         self.thoughts: list[str] = []
         logger.remove()
         logger.add(self._log_sink, format="{message}", level="INFO")
+        logger.info("SidePanelUI initialized")
 
     def _log_sink(self, message: str):
         self.logs.append(message)
@@ -36,8 +37,8 @@ class SidePanelUI:
     async def run(self):
         agents = {"manus": Manus()}
         prompt = input("Enter your prompt: ").strip()
-        if not prompt:
-            logger.warning("Empty prompt provided.")
+        if not prompt or len(prompt) < 3:
+            logger.warning("Invalid or empty prompt provided.")
             return
 
         flow = FlowFactory.create_flow(flow_type=FlowType.PLANNING, agents=agents)

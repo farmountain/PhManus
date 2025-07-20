@@ -23,6 +23,7 @@ class ChatSession:
 
             Manus = _Manus
         self.agent = Manus()
+        logger.info("Chat session initialized")
 
     async def generate(self, message: str) -> str:
         if not message.strip():

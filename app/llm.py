@@ -1,15 +1,22 @@
 import math
 from typing import Dict, List, Optional, Union
 
-import tiktoken
-from openai import (
-    APIError,
-    AsyncAzureOpenAI,
-    AsyncOpenAI,
-    AuthenticationError,
-    OpenAIError,
-    RateLimitError,
-)
+try:
+    import tiktoken
+except Exception:  # pragma: no cover - optional dependency
+    tiktoken = None
+
+try:  # pragma: no cover - optional dependency
+    from openai import (
+        APIError,
+        AsyncAzureOpenAI,
+        AsyncOpenAI,
+        AuthenticationError,
+        OpenAIError,
+        RateLimitError,
+    )
+except Exception:  # pragma: no cover
+    APIError = AsyncAzureOpenAI = AsyncOpenAI = AuthenticationError = OpenAIError = RateLimitError = object
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -203,20 +210,31 @@ class LLM:
             )
 
             # Initialize tokenizer
-            try:
-                self.tokenizer = tiktoken.encoding_for_model(self.model)
-            except KeyError:
-                # If the model is not in tiktoken's presets, use cl100k_base as default
-                self.tokenizer = tiktoken.get_encoding("cl100k_base")
+            if tiktoken:
+                try:
+                    self.tokenizer = tiktoken.encoding_for_model(self.model)
+                except KeyError:
+                    self.tokenizer = tiktoken.get_encoding("cl100k_base")
+            else:  # pragma: no cover - fallback when tiktoken missing
+                self.tokenizer = type(
+                    "DummyTokenizer",
+                    (),
+                    {"encode": lambda _self, t: t.split() if t else []},
+                )()
 
-            if self.api_type == "azure":
-                self.client = AsyncAzureOpenAI(
-                    base_url=self.base_url,
-                    api_key=self.api_key,
-                    api_version=self.api_version,
-                )
-            else:
-                self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
+            if APIError is not object:
+                if self.api_type == "azure":
+                    self.client = AsyncAzureOpenAI(
+                        base_url=self.base_url,
+                        api_key=self.api_key,
+                        api_version=self.api_version,
+                    )
+                else:
+                    self.client = AsyncOpenAI(
+                        api_key=self.api_key, base_url=self.base_url
+                    )
+            else:  # pragma: no cover - openai not installed
+                self.client = None
 
             self.token_counter = TokenCounter(self.tokenizer)
 

@@ -1,14 +1,24 @@
 import argparse
 import asyncio
+import re
 import time
-
-from app.agent.manus import Manus
 from app.flow.base import FlowType
 from app.flow.flow_factory import FlowFactory
 from app.logger import define_log_level, logger
 
 
-def parse_args() -> argparse.Namespace:
+def _validate_plan_id(value: str) -> str:
+    """Validate plan identifier format."""
+    if not re.match(r"^[A-Za-z0-9_-]+$", value):
+        raise argparse.ArgumentTypeError(
+            "plan-id must be alphanumeric and may include hyphens/underscores"
+        )
+    if len(value) > 50:
+        raise argparse.ArgumentTypeError("plan-id must be under 50 characters")
+    return value
+
+
+def parse_args(args: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the PhManus planning flow")
     parser.add_argument(
         "prompt",
@@ -18,6 +28,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--plan-id",
         dest="plan_id",
+        type=_validate_plan_id,
         help="Use an existing plan identifier instead of creating a new one",
     )
     parser.add_argument(
@@ -30,14 +41,21 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="List available tools and exit",
     )
-    return parser.parse_args()
+    parsed = parser.parse_args(args=args)
+    logger.debug(f"Parsed arguments: {parsed}")
+    return parsed
 
 
 async def run_flow(args: argparse.Namespace) -> None:
+    from app.agent.manus import Manus
+
     agents = {"manus": Manus()}
 
     if args.verbose:
         define_log_level("DEBUG")
+        logger.debug("Debug logging enabled")
+
+    logger.info("Starting CLI run_flow")
 
     if args.list_tools:
         for key, agent in agents.items():
@@ -56,7 +74,7 @@ async def run_flow(args: argparse.Namespace) -> None:
         plan_id=args.plan_id,
     )
 
-    logger.warning("Processing your request...")
+    logger.info("Processing your request...")
 
     try:
         start_time = time.time()
