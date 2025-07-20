@@ -1,6 +1,10 @@
 # tool/planning.py
+import asyncio
 from typing import Dict, List, Literal, Optional
 
+import requests
+
+from app.config import config
 from app.exceptions import ToolError
 from app.tool.base import BaseTool, ToolResult
 
@@ -68,6 +72,31 @@ class PlanningTool(BaseTool):
 
     plans: dict = {}  # Dictionary to store plans by plan_id
     _current_plan_id: Optional[str] = None  # Track the current active plan
+
+    async def _sync_with_mcp(
+        self, method: str, plan_id: str, payload: Optional[dict] = None
+    ):
+        """Synchronize plan data with MCP server if configured."""
+        if not config.mcp_config or not config.mcp_config.server_url:
+            return
+
+        url = f"{config.mcp_config.server_url.rstrip('/')}/plans/{plan_id}"
+        headers = {}
+        if config.mcp_config.api_key:
+            headers["Authorization"] = f"Bearer {config.mcp_config.api_key}"
+
+        def request_fn():
+            if method == "POST":
+                requests.post(url, json=payload, headers=headers, timeout=5)
+            elif method == "PUT":
+                requests.put(url, json=payload, headers=headers, timeout=5)
+            elif method == "DELETE":
+                requests.delete(url, headers=headers, timeout=5)
+            elif method == "GET":
+                return requests.get(url, headers=headers, timeout=5)
+
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, request_fn)
 
     async def execute(
         self,
@@ -153,6 +182,8 @@ class PlanningTool(BaseTool):
         self.plans[plan_id] = plan
         self._current_plan_id = plan_id  # Set as active plan
 
+        asyncio.create_task(self._sync_with_mcp("POST", plan_id, plan))
+
         return ToolResult(
             output=f"Plan created successfully with ID: {plan_id}\n\n{self._format_plan(plan)}"
         )
@@ -201,6 +232,8 @@ class PlanningTool(BaseTool):
             plan["steps"] = steps
             plan["step_statuses"] = new_statuses
             plan["step_notes"] = new_notes
+
+        asyncio.create_task(self._sync_with_mcp("PUT", plan_id, plan))
 
         return ToolResult(
             output=f"Plan updated successfully: {plan_id}\n\n{self._format_plan(plan)}"
@@ -316,6 +349,8 @@ class PlanningTool(BaseTool):
         # If the deleted plan was the active plan, clear the active plan
         if self._current_plan_id == plan_id:
             self._current_plan_id = None
+
+        asyncio.create_task(self._sync_with_mcp("DELETE", plan_id))
 
         return ToolResult(output=f"Plan '{plan_id}' has been deleted.")
 
