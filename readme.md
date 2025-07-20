@@ -15,6 +15,7 @@
 - **Simple Task Handling**: Detects and handles simple tasks directly without detailed planning.
 - **Plan Management**: Tracks task progress, step statuses, and provides summaries upon completion.
 - **Extensibility**: Easily extendable to support new agents, tools, and workflows.
+- **Industry Workflows**: YAML files define domain specific steps chaining agents together.
 
 - **Command Line Demo**: `run_flow.py` provides a simple interactive example.
 - **Side Panel Terminal UI**: `side_panel.py` opens a split screen showing agent thoughts and logs in real time.
@@ -105,6 +106,15 @@ The framework integrates with an LLM to generate plans and summaries.
 2. **Plan Creation**: The framework generates a plan using the LLM and planning tool.
 3. **Step Execution**: Each step is executed by the appropriate agent.
 4. **Completion**: The framework finalizes the plan and provides a summary.
+5. **Domain Review**: Optionally run a domain specialist agent for industry compliance.
+### Loading a workflow from YAML
+Use `load_workflow` to parse YAML workflow files.
+```python
+from app.flow.workflow_loader import load_workflow
+wf = load_workflow("agent_templates/industry_agent_steps.yaml")
+print(wf["name"])
+```
+
 
 ## Documentation
 Additional information including the architecture overview, design goals and roadmap can be found in the [docs](./docs) directory. See [usage_demo.md](docs/usage_demo.md) for a CLI example.

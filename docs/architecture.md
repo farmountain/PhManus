@@ -16,3 +16,4 @@ User -> PlanningFlow -> [Agents] -> Tools
 
 The LLM interface is encapsulated in `LLM` which supports OpenAI, Azure and Ollama
 endpoints.  Configuration is loaded from `config.toml`.
+Workflows can also be described in YAML files. The helper `load_workflow` parses these definitions so they can be inspected or executed programmatically.
