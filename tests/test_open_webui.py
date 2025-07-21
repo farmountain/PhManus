@@ -80,3 +80,23 @@ def test_recent_helpers(monkeypatch):
     session.logs = ["a", "b", "c"]
     assert session.get_recent_logs(2) == ["b", "c"]
     assert session.get_recent_thoughts(2) == ["user: hi", "assistant: hey"]
+
+
+def test_marketplace_link_utf8():
+    # ensure constant uses valid unicode that can be encoded
+    encoded = open_webui.MARKETPLACE_LINK.encode("utf-8")
+    assert b"MCP Servers Marketplace" in encoded
+
+
+def test_launch_fallback(monkeypatch):
+    calls = []
+
+    def fake_launch(*args, **kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            raise ValueError("When localhost is not accessible, a shareable link must be created")
+
+    monkeypatch.setattr(open_webui.open_webui, "launch", fake_launch)
+    open_webui.launch()
+    assert len(calls) == 2
+    assert calls[1].get("share") is True

@@ -52,11 +52,13 @@ def respond(message, history):
     return asyncio.run(sess.generate(message))
 
 
+MARKETPLACE_LINK = (
+    "<a href='https://github.com/modelcontextprotocol/servers' "
+    "target='_blank'>\U0001F4BE MCP Servers Marketplace</a>"
+)
+
 with gr.Blocks() as chatbot:
-    gr.Markdown(
-        "<a href='https://github.com/modelcontextprotocol/servers' target='_blank'>"
-        "\ud83d\udcbe MCP Servers Marketplace</a>"
-    )
+    gr.Markdown(MARKETPLACE_LINK)
     gr.ChatInterface(
         respond,
         title="Manus Chat",
@@ -65,7 +67,14 @@ with gr.Blocks() as chatbot:
 
 
 def launch():
-    chatbot.launch(server_name="0.0.0.0", server_port=7860)
+    try:
+        chatbot.launch(server_name="0.0.0.0", server_port=7860)
+    except ValueError as exc:  # pragma: no cover - runtime environment guard
+        if "localhost is not accessible" in str(exc):
+            logger.warning("localhost not accessible, launching with share=True")
+            chatbot.launch(server_name="0.0.0.0", server_port=7860, share=True)
+        else:
+            raise
 
 
 if __name__ == "__main__":

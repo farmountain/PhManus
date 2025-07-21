@@ -62,6 +62,8 @@ Launch the Open Web UI with a side panel:
 ```bash
 python open_webui.py
 ```
+If you encounter a ValueError about localhost accessibility, the script will
+automatically retry with `share=True` to generate a public link.
 
 ### Docker Quick Evaluation
 Build the release image for quick testing:
