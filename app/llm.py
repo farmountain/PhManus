@@ -1,6 +1,7 @@
 import math
 from typing import Dict, List, Optional, Union
 
+
 try:
     import tiktoken
 except Exception:  # pragma: no cover - optional dependency
@@ -16,7 +17,9 @@ try:  # pragma: no cover - optional dependency
         RateLimitError,
     )
 except Exception:  # pragma: no cover
-    APIError = AsyncAzureOpenAI = AsyncOpenAI = AuthenticationError = OpenAIError = RateLimitError = object
+    APIError = (
+        AsyncAzureOpenAI
+    ) = AsyncOpenAI = AuthenticationError = OpenAIError = RateLimitError = object
 from tenacity import (
     retry,
     retry_if_exception_type,
