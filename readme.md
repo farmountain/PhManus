@@ -57,6 +57,16 @@ Or launch the side panel interface:
 python side_panel.py
 ```
 
+### Docker Quick Evaluation
+Build the release image for quick testing:
+```bash
+bash scripts/build-release-image.sh
+```
+Run it with:
+```bash
+docker run -p 5000:5000 phmanus:release
+```
+
 ### 1. Initialize the Planning Flow
 The `PlanningFlow` class is the core of the framework. It manages agents, plans, and task execution.
 
@@ -124,7 +134,7 @@ print(wf["name"])
 
 
 ## Documentation
-Additional information including the architecture overview, design goals and roadmap can be found in the [docs](./docs) directory. See [usage_demo.md](docs/usage_demo.md) for a CLI example. The [prompt_library.md](docs/prompt_library.md) file describes the standardized prompt templates. The high level methodology is documented in [agentic_framework.md](docs/agentic_framework.md). Domain workflows are listed in [domain_workflow_list.md](agent_templates/domain_workflow_list.md).
+Additional information including the architecture overview, design goals and roadmap can be found in the [docs](./docs) directory. See [usage_demo.md](docs/usage_demo.md) for a CLI example. The [prompt_library.md](docs/prompt_library.md) file describes the standardized prompt templates. The high level methodology is documented in [agentic_framework.md](docs/agentic_framework.md) and [deployment_framework.md](docs/deployment_framework.md). Domain workflows are listed in [domain_workflow_list.md](agent_templates/domain_workflow_list.md).
 
 ---
 
