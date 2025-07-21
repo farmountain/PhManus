@@ -62,10 +62,13 @@ def get_session() -> ChatSession:
     return session
 
 
+MARKETPLACE_LINK = (
+    "<a href='https://github.com/modelcontextprotocol/servers' "
+    "target='_blank'>\U0001F4BE MCP Servers Marketplace</a>"
+)
+
 with gr.Blocks() as open_webui:
-    gr.Markdown(
-        "<a href='https://github.com/modelcontextprotocol/servers' target='_blank'>\ud83d\udcbe MCP Servers Marketplace</a>"
-    )
+    gr.Markdown(MARKETPLACE_LINK)
     with gr.Row():
         with gr.Column(scale=3):
             chatbot = gr.Chatbot()
@@ -99,7 +102,16 @@ with gr.Blocks() as open_webui:
 
 
 def launch():
-    open_webui.launch(server_name="0.0.0.0", server_port=7860)
+    try:
+        open_webui.launch(server_name="0.0.0.0", server_port=7860)
+    except ValueError as exc:  # pragma: no cover - runtime environment guard
+        if "localhost is not accessible" in str(exc):
+            logger.warning("localhost not accessible, launching with share=True")
+            open_webui.launch(
+                server_name="0.0.0.0", server_port=7860, share=True
+            )
+        else:
+            raise
 
 
 if __name__ == "__main__":
