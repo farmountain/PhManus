@@ -33,3 +33,8 @@ from app.flow.workflow_loader import load_workflow
 wf = load_workflow("agent_templates/finance_agent_steps.yaml")
 print(wf["steps"])
 ```
+
+To experiment with a graphical interface that includes a side panel for logs and agent thoughts, run:
+```bash
+python open_webui.py
+```

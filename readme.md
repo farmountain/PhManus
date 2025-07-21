@@ -20,6 +20,7 @@
 
 - **Command Line Demo**: `run_flow.py` provides a simple interactive example.
 - **Side Panel Terminal UI**: `side_panel.py` opens a split screen showing agent thoughts and logs in real time.
+- **Open Web UI**: `open_webui.py` provides a ChatGPT-style interface with a side panel for logs and thoughts.
 ---
 
 ## Installation
@@ -55,6 +56,11 @@ python run_flow.py --list-tools
 Or launch the side panel interface:
 ```bash
 python side_panel.py
+```
+
+Launch the Open Web UI with a side panel:
+```bash
+python open_webui.py
 ```
 
 ### Docker Quick Evaluation
