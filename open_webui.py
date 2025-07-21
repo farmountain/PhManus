@@ -1,9 +1,9 @@
-import asyncio
 from typing import List
 
 import gradio as gr
 
 from app.logger import logger
+
 
 try:
     from app.agent.manus import Manus as _Manus
@@ -84,7 +84,11 @@ with gr.Blocks() as open_webui:
         prompt = history[-1][0]
         result = await sess.generate(prompt)
         history[-1][1] = result
-        return history, "\n".join(sess.get_recent_thoughts()), "\n".join(sess.get_recent_logs())
+        return (
+            history,
+            "\n".join(sess.get_recent_thoughts()),
+            "\n".join(sess.get_recent_logs()),
+        )
 
     msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=False).then(
         bot_response, chatbot, [chatbot, thoughts, logs]
